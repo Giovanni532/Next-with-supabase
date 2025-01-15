@@ -4,18 +4,28 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { z } from "zod";
+
+const signUpSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  firstname: z.string().min(2),
+  lastname: z.string().min(2),
+});
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const firstname = formData.get("firstname")?.toString();
+  const lastname = formData.get("lastname")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
-  if (!email || !password) {
+  if (!email || !password || !firstname || !lastname) {
     return encodedRedirect(
       "error",
       "/sign-up",
-      "Email and password are required",
+      "Email, password, firstname and lastname are required",
     );
   }
 
@@ -34,7 +44,7 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect(
       "success",
       "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
+      "Merci pour votre inscription ! Veuillez vérifier votre email pour un lien de vérification.",
     );
   }
 };
